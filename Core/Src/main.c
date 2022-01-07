@@ -19,6 +19,8 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "adc.h"
+#include "tim.h"
 #include "usart.h"
 #include "usb_otg.h"
 #include "gpio.h"
@@ -89,7 +91,14 @@ int main(void)
   MX_GPIO_Init();
   MX_USART3_UART_Init();
   MX_USB_OTG_FS_PCD_Init();
+  MX_TIM4_Init();
+  MX_TIM3_Init();
+  MX_TIM1_Init();
+  MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
+
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+  HAL_TIM_Base_Start_IT(&htim4);
 
   /* USER CODE END 2 */
 
@@ -159,6 +168,11 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+//		HAL_ADC_Start(&hadc1);
+//		HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
+//		AdcValue = HAL_ADC_GetValue(&hadc1);
+//		HAL_Delay(100);
+
 
 /* USER CODE END 4 */
 
