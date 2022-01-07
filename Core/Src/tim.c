@@ -22,7 +22,12 @@
 
 /* USER CODE BEGIN 0 */
 #include "adc.h"
+#include "pid.h"
+
+// Variables
 uint32_t pulseWidth = 0;
+uint16_t encoderValue = 0;
+
 /* USER CODE END 0 */
 
 TIM_HandleTypeDef htim1;
@@ -351,10 +356,19 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
 		ADC_Value = HAL_ADC_GetValue(&hadc1);
 		HAL_Delay(100);
+		GetEncoderValue();
 		SetPwmValue(pulseWidth);
 	}
 }
 
+void GetEncoderValue(){
+	encoderValue = __HAL_TIM_GET_COUNTER(&htim3);
+
+	// Calculate RPM
+	uint32_t calculation = encoderValue;
+	pidController.measuredSpeed = calculation;
+	HAL_Delay(100);
+}
 
 /* USER CODE END 1 */
 

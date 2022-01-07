@@ -37,6 +37,8 @@ extern TIM_HandleTypeDef htim4;
 
 /* USER CODE BEGIN Private defines */
 extern uint32_t pulseWidth;
+extern uint16_t encoderValue;
+
 /* USER CODE END Private defines */
 
 void MX_TIM1_Init(void);
@@ -46,7 +48,8 @@ void MX_TIM4_Init(void);
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
 /* USER CODE BEGIN Prototypes */
-
+void GetEncoderValue();
+void SetPwmValue(uint32_t value);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

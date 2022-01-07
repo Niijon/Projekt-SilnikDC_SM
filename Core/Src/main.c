@@ -168,11 +168,6 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-//		HAL_ADC_Start(&hadc1);
-//		HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
-//		AdcValue = HAL_ADC_GetValue(&hadc1);
-//		HAL_Delay(100);
-
 
 /* USER CODE END 4 */
 

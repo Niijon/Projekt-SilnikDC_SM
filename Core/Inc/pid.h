@@ -8,8 +8,13 @@
 #ifndef INC_PID_H_
 #define INC_PID_H_
 
+// Includes
+#include <stdint.h>
+
+// Defines
 #define SIZE 10
 
+// Variables
 extern uint32_t measurmentsVector[10];
 
 /* PID controller with  */
@@ -20,6 +25,9 @@ typedef struct PID{
 	double Ti;
 	double Td;
 	uint32_t measuredSpeed;
+	uint32_t controlError[2];
+	uint32_t sumOfControlError;
+
 } PID;
 
 extern PID pidController;
