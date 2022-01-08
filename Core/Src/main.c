@@ -54,6 +54,8 @@ Lcd_PinType pins[] = { D4_Pin, D5_Pin, D6_Pin, D7_Pin };
 
 Lcd_HandleTypeDef lcd;
 
+char *msg;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -122,6 +124,9 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	  encoderValue = __HAL_TIM_GET_COUNTER(&htim1); sprintf((char*)msg, "Enkoder= %3i\n\r", encoderValue);
+	  HAL_UART_Transmit(&huart3, (uint8_t*)msg, strlen(msg), 1000);
+	  HAL_Delay(1);
   }
   /* USER CODE END 3 */
 }
