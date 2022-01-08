@@ -27,7 +27,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "lcd.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -47,6 +47,12 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+Lcd_PortType ports[] =
+		{ D4_GPIO_Port, D5_GPIO_Port, D6_GPIO_Port, D7_GPIO_Port };
+
+Lcd_PinType pins[] = { D4_Pin, D5_Pin, D6_Pin, D7_Pin };
+
+Lcd_HandleTypeDef lcd;
 
 /* USER CODE END PV */
 
@@ -99,6 +105,13 @@ int main(void)
 
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
   HAL_TIM_Base_Start_IT(&htim4);
+
+  lcd = Lcd_create(ports, pins, RS_GPIO_Port, RS_Pin, EN_GPIO_Port, EN_Pin, LCD_4_BIT_MODE);
+
+  Lcd_string(&lcd, "4ilo - 4bit");
+
+  Lcd_cursor(&lcd, 1,6);
+  Lcd_int(&lcd, -500);
 
   /* USER CODE END 2 */
 
