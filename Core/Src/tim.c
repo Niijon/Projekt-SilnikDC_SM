@@ -23,11 +23,26 @@
 /* USER CODE BEGIN 0 */
 #include "adc.h"
 #include "pid.h"
-
+#include "usart.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdbool.h>
 // Variables
 uint32_t pulseWidth = 0;
-uint16_t encoderValue = 0;
+int encoderValue = 0;
+int killme=0;
 
+
+char *msg;
+double RPM = 0.0;
+uint32_t lastEncoder = 0;
+int impulses = 370;
+const double scaler = 60.0 * 1/1;
+uint32_t difference = 0;
+uint8_t *uartMessages;
+uint32_t lastUartMessagesIndex = 0;
+bool messagesReady = false;
 /* USER CODE END 0 */
 
 TIM_HandleTypeDef htim1;
@@ -126,18 +141,18 @@ void MX_TIM3_Init(void)
   htim3.Instance = TIM3;
   htim3.Init.Prescaler = 0;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 490;
+  htim3.Init.Period = 65535;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   sConfig.EncoderMode = TIM_ENCODERMODE_TI12;
-  sConfig.IC1Polarity = TIM_ICPOLARITY_RISING;
+  sConfig.IC1Polarity = TIM_ICPOLARITY_FALLING;
   sConfig.IC1Selection = TIM_ICSELECTION_DIRECTTI;
   sConfig.IC1Prescaler = TIM_ICPSC_DIV1;
-  sConfig.IC1Filter = 10;
-  sConfig.IC2Polarity = TIM_ICPOLARITY_RISING;
+  sConfig.IC1Filter = 0;
+  sConfig.IC2Polarity = TIM_ICPOLARITY_FALLING;
   sConfig.IC2Selection = TIM_ICSELECTION_DIRECTTI;
   sConfig.IC2Prescaler = TIM_ICPSC_DIV1;
-  sConfig.IC2Filter = 10;
+  sConfig.IC2Filter = 0;
   if (HAL_TIM_Encoder_Init(&htim3, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -170,7 +185,7 @@ void MX_TIM4_Init(void)
   htim4.Instance = TIM4;
   htim4.Init.Prescaler = 7199;
   htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim4.Init.Period = 9999;
+  htim4.Init.Period = 9;
   htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim4) != HAL_OK)
@@ -351,13 +366,43 @@ void SetPwmValue(uint32_t value){
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
-	if (htim->Instance == TIM4) {
-		HAL_ADC_Start(&hadc1);
-		HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
-		ADC_Value = HAL_ADC_GetValue(&hadc1);
-		HAL_Delay(100);
-		GetEncoderValue();
-		SetPwmValue(pulseWidth);
+	if (htim->Instance == TIM4) { // 1s timer
+		uint8_t messageLen = 6;
+		if (lastUartMessagesIndex == 0 && !messagesReady){
+			uartMessages = calloc(1, 1000*messageLen);
+		}
+		if (lastUartMessagesIndex >= 6000){
+			messagesReady = true;
+		}
+		if (!messagesReady){
+
+	//		HAL_ADC_Start(&hadc1);
+	//		HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
+	//		ADC_Value = HAL_ADC_GetValue(&hadc1);
+	//		HAL_Delay(100);
+	//		GetEncoderValue();
+	//		SetPwmValue(pulseWidth);
+			char *message;
+			message = calloc(1, messageLen*(sizeof(uint8_t)));
+			encoderValue = __HAL_TIM_GET_COUNTER(&htim3);
+			if(lastEncoder > encoderValue){
+				lastEncoder = 65535 - lastEncoder;
+				encoderValue = encoderValue + lastEncoder;
+				lastEncoder = 0;
+			}
+			difference = encoderValue - lastEncoder;
+			RPM = (difference) * scaler / 1928.0;
+			killme = (int)(RPM);
+			//sprintf((char *)message, "%03i\n\r", killme);
+			sprintf((char *)message, "%d\n\r", killme);
+
+			memcpy(uartMessages+lastUartMessagesIndex+messageLen, message, messageLen*sizeof(uint8_t));
+			lastUartMessagesIndex += 6;
+			//HAL_UART_Transmit(&huart3, (uint8_t *)message, strlen(message), 50);
+			free(message);
+			//*msg = '\n';
+			lastEncoder = encoderValue;
+		}
 	}
 }
 

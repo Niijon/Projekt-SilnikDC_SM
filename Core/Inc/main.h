@@ -32,12 +32,14 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdbool.h>
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
-
+extern uint8_t *uartMessages;
+extern uint32_t lastUartMessagesIndex;
+extern bool messagesReady;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/

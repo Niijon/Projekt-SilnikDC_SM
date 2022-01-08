@@ -28,6 +28,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "lcd.h"
+#include <stdlib.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -37,6 +38,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -54,8 +56,7 @@ Lcd_PinType pins[] = { D4_Pin, D5_Pin, D6_Pin, D7_Pin };
 
 Lcd_HandleTypeDef lcd;
 
-char *msg;
-
+char data[] = "Maurycy\n\r";
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -107,26 +108,37 @@ int main(void)
 
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
   HAL_TIM_Base_Start_IT(&htim4);
+  HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_2);
 
-  lcd = Lcd_create(ports, pins, RS_GPIO_Port, RS_Pin, EN_GPIO_Port, EN_Pin, LCD_4_BIT_MODE);
-
-  Lcd_string(&lcd, "4ilo - 4bit");
-
-  Lcd_cursor(&lcd, 1,6);
-  Lcd_int(&lcd, -500);
+//  lcd = Lcd_create(ports, pins, RS_GPIO_Port, RS_Pin, EN_GPIO_Port, EN_Pin, LCD_4_BIT_MODE);
+//
+//  Lcd_string(&lcd, "4ilo - 4bit");
+//
+//  Lcd_cursor(&lcd, 1,6);
+//  Lcd_int(&lcd, -500);
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
   while (1)
   {
+//	  HAL_UART_Transmit(&huart3, (uint8_t*)msg, strlen(msg), 1000);
+	  HAL_Delay(10);
+	  if (messagesReady){
+		  HAL_TIM_Base_Stop_IT(&htim4);
+		  HAL_UART_Transmit(&huart3, uartMessages, lastUartMessagesIndex, 10000);
+		  lastUartMessagesIndex = 0;
+		  messagesReady = false;
+		  free(uartMessages);
+	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  encoderValue = __HAL_TIM_GET_COUNTER(&htim1); sprintf((char*)msg, "Enkoder= %3i\n\r", encoderValue);
-	  HAL_UART_Transmit(&huart3, (uint8_t*)msg, strlen(msg), 1000);
-	  HAL_Delay(1);
+
+
   }
   /* USER CODE END 3 */
 }

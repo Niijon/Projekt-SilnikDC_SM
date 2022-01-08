@@ -37,7 +37,10 @@ extern TIM_HandleTypeDef htim4;
 
 /* USER CODE BEGIN Private defines */
 extern uint32_t pulseWidth;
-extern uint16_t encoderValue;
+extern int encoderValue;
+extern int killme;
+
+char *msg;
 
 /* USER CODE END Private defines */
 
