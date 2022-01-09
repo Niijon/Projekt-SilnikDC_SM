@@ -19,7 +19,7 @@ extern uint32_t measurmentsVector[10];
 
 /* PID controller with  */
 typedef struct PID{
-	uint32_t referenceSignal;
+	double referenceSignal;
 	double controlSignal;
 	double Kp;
 	double Ti;

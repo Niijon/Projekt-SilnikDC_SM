@@ -34,28 +34,29 @@ extern "C" {
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim4;
+extern TIM_HandleTypeDef htim9;
 
 /* USER CODE BEGIN Private defines */
+#define FILTERN 10
+#define TIM4PERIOD 10
+
+// Global
 extern uint32_t pulseWidth;
-extern int encoderValue;
-extern int killme;
+extern double RPM[10];
+extern bool dataReady;
 
-char *msg;
-
-extern char uartMessages[1000][6];
-extern bool messagesReady;
-extern uint32_t k;
 
 /* USER CODE END Private defines */
 
 void MX_TIM1_Init(void);
 void MX_TIM3_Init(void);
 void MX_TIM4_Init(void);
+void MX_TIM9_Init(void);
 
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
 /* USER CODE BEGIN Prototypes */
-void GetEncoderValue(double RPM);
+double GetEncoderValue();
 void SetPwmValue(uint32_t value);
 /* USER CODE END Prototypes */
 

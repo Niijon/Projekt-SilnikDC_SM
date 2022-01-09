@@ -56,7 +56,6 @@ Lcd_PinType pins[] = { D4_Pin, D5_Pin, D6_Pin, D7_Pin };
 
 Lcd_HandleTypeDef lcd;
 
-char data[] = "Maurycy\n\r";
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -104,6 +103,7 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM1_Init();
   MX_ADC1_Init();
+  MX_TIM9_Init();
   /* USER CODE BEGIN 2 */
 
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
@@ -125,23 +125,12 @@ int main(void)
 
 	while (1) {
 //	  HAL_UART_Transmit(&huart3, (uint8_t*)msg, strlen(msg), 1000);
-		HAL_Delay(10);
-		if (messagesReady) {
-			HAL_TIM_Base_Stop_IT(&htim4);
-			for (uint32_t i = 0; i < 1000-1; i++) {
-				HAL_UART_Transmit(&huart3, (uint8_t *)&uartMessages[i], 5, 50);
-				HAL_Delay(20);
-			}
-			messagesReady = false;
-			k = 0;
-		}
-		HAL_TIM_Base_Start_IT(&htim4);
-		/* USER CODE END WHILE */
+    /* USER CODE END WHILE */
 
-		/* USER CODE BEGIN 3 */
+    /* USER CODE BEGIN 3 */
 
 	}
-	/* USER CODE END 3 */
+  /* USER CODE END 3 */
 }
 
 /**
