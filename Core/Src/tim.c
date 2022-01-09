@@ -45,7 +45,7 @@ uint16_t difference = 0; // Storing difference of encoder readings
 
 uint8_t k = 0; // Variable used as a storage of index of filter input
 
-bool dataReady = false;
+bool dataReady = false; // Flags that data is ready in vector;
 /* USER CODE END 0 */
 
 TIM_HandleTypeDef htim1;
@@ -448,10 +448,12 @@ void HAL_TIM_Encoder_MspDeInit(TIM_HandleTypeDef* tim_encoderHandle)
 }
 
 /* USER CODE BEGIN 1 */
-void SetPwmValue(uint32_t value){
-	if(value > 1000) value = 1000;
-	if(value < 0) value = 0;
-	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, value);
+void SetPwmValue(){
+	pulseWidth = (uint32_t)(pidController.controlSignal);
+
+	if(pulseWidth > 1000) pulseWidth = 1000;
+	if(pulseWidth < 0) pulseWidth = 0;
+	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, pulseWidth);
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
@@ -464,26 +466,30 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 			encoderValue = 65535 - lastEncoder + encoderValue;
 			lastEncoder = 0;
 		}
-		char *message = calloc(1, 6);
+
 		difference = encoderValue - lastEncoder;
 		RPM[k] = (difference) * scaler / 1928.0;
 		double avgRPM = GetEncoderValue();
-		int RPMInt = (int)(avgRPM);
-		sprintf((char*) message, "%03i\n\r", RPMInt);
-		HAL_UART_Transmit(&huart3, (uint8_t *)message, strlen(message), 50);
+
+		// Updating PID measurments of RPM
+		UpdatePid(avgRPM);
+
+		// End Cycle operations
 		lastEncoder = encoderValue;
-		free(message);
 		k = (k + 1) % FILTERN;
 		if(!dataReady) dataReady = !k;
 	}
 	if (htim->Instance == TIM9) {
-		HAL_ADC_Start(&hadc1);
-		HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
-		ADC_Value = HAL_ADC_GetValue(&hadc1);
-		pulseWidth = (uint16_t)(ADC_Value/4.095);
-		pidController.referenceSignal = (pulseWidth/1000.0)*12.0;
-		SetPwmValue(pulseWidth);
+		// Updating reference value
+		ReadADC();
+		pidController.referenceSignal = (double)(ADC_Value/4095.0)*130;
 
+		// Sending data about current speed via USART
+		char *message = calloc(1, 6);
+		int RPMInt = (int)(pidController.measuredSpeed);
+		sprintf((char*) message, "%03i\n\r", RPMInt);
+		HAL_UART_Transmit(&huart3, (uint8_t *)message, strlen(message), 50);
+		free(message);
 	}
 }
 
@@ -498,6 +504,31 @@ double GetEncoderValue(){
 		return RPMTmp;
 	}
 	return 0;
+}
+
+void ReadADC() {
+	HAL_ADC_Start(&hadc1);
+	HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
+	ADC_Value = HAL_ADC_GetValue(&hadc1);
+}
+
+void UpdatePid(double RPMAVG) {
+	// Update measurment
+	pidController.measuredSpeed = RPMAVG;
+
+	// Controll error handling in preparation for calculating control signal
+	pidController.controlError[1] = pidController.controlError[0];
+	pidController.controlError[0] = (pidController.referenceSignal
+			- pidController.measuredSpeed);
+	pidController.sumOfControlError += pidController.controlError[0];
+
+	// Calculate control signal
+	pidController.controlSignal = pidController.Kp
+			* (1 * pidController.controlError[0]
+					+ pidController.sumOfControlError * 1 / pidController.Ti
+					+ pidController.Td
+							* (pidController.controlError[0]
+									- pidController.controlError[1]));
 }
 
 /* USER CODE END 1 */

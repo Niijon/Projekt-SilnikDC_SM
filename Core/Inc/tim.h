@@ -37,8 +37,8 @@ extern TIM_HandleTypeDef htim4;
 extern TIM_HandleTypeDef htim9;
 
 /* USER CODE BEGIN Private defines */
-#define FILTERN 10
-#define TIM4PERIOD 10
+#define FILTERN 10 // Number of measurment points that goes to filter
+#define TIM4PERIOD 10 // Time period in ms of TIM4
 
 // Global
 extern uint32_t pulseWidth;
@@ -57,7 +57,9 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
 /* USER CODE BEGIN Prototypes */
 double GetEncoderValue();
-void SetPwmValue(uint32_t value);
+void SetPwmValue();
+void ReadADC();
+void UpdatePid(double RPMAVG);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

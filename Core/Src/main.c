@@ -124,6 +124,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 
 	while (1) {
+		HAL_Delay(300);
 //	  HAL_UART_Transmit(&huart3, (uint8_t*)msg, strlen(msg), 1000);
     /* USER CODE END WHILE */
 
