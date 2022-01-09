@@ -38,10 +38,10 @@ char *msg;
 double RPM = 0.0;
 uint32_t lastEncoder = 0;
 int impulses = 370;
-const double scaler = 60.0 * 1/1;
+const double scaler = 60.0 * 1/0.001;
 uint32_t difference = 0;
-uint8_t *uartMessages;
-uint32_t lastUartMessagesIndex = 0;
+char uartMessages[1000][6];
+uint32_t k = 0;
 bool messagesReady = false;
 /* USER CODE END 0 */
 
@@ -368,13 +368,11 @@ void SetPwmValue(uint32_t value){
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 	if (htim->Instance == TIM4) { // 1s timer
 		uint8_t messageLen = 6;
-		if (lastUartMessagesIndex == 0 && !messagesReady){
-			uartMessages = calloc(1, 1000*messageLen);
-		}
-		if (lastUartMessagesIndex >= 6000){
+		if (k >= 999){
 			messagesReady = true;
 		}
 		if (!messagesReady){
+			uint32_t circularValue = 0;
 
 	//		HAL_ADC_Start(&hadc1);
 	//		HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
@@ -382,35 +380,35 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 	//		HAL_Delay(100);
 	//		GetEncoderValue();
 	//		SetPwmValue(pulseWidth);
-			char *message;
-			message = calloc(1, messageLen*(sizeof(uint8_t)));
 			encoderValue = __HAL_TIM_GET_COUNTER(&htim3);
 			if(lastEncoder > encoderValue){
-				lastEncoder = 65535 - lastEncoder;
-				encoderValue = encoderValue + lastEncoder;
-				lastEncoder = 0;
+//				lastEncoder = 65535 - lastEncoder;
+//				encoderValue = encoderValue + lastEncoder;
+//				lastEncoder = 0;
+				circularValue = 65535;
 			}
+			char *message = calloc(1,6);
 			difference = encoderValue - lastEncoder;
 			RPM = (difference) * scaler / 1928.0;
-			killme = (int)(RPM);
-			//sprintf((char *)message, "%03i\n\r", killme);
-			sprintf((char *)message, "%d\n\r", killme);
+			int RPMInt = (int)(RPM);
+			sprintf((char *)message, "%03i\n\r", RPMInt);
+//			sprintf((char *)message, "%d\n\r", killme);
+			for(uint8_t i = 0; i < messageLen; i++){
+				uartMessages[k][i] = (message)[i];
+			}
 
-			memcpy(uartMessages+lastUartMessagesIndex+messageLen, message, messageLen*sizeof(uint8_t));
-			lastUartMessagesIndex += 6;
 			//HAL_UART_Transmit(&huart3, (uint8_t *)message, strlen(message), 50);
-			free(message);
-			//*msg = '\n';
 			lastEncoder = encoderValue;
+			GetEncoderValue(RPM);
+			free(*message);
 		}
+		k++;
 	}
 }
 
-void GetEncoderValue(){
+void GetEncoderValue(double RPM){
 	// Calculate RPM
-	uint32_t calculation = encoderValue;
-	pidController.measuredSpeed = calculation;
-	HAL_Delay(100);
+	pidController.measuredSpeed = RPM;
 }
 
 /* USER CODE END 1 */

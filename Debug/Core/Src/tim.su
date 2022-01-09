@@ -7,5 +7,5 @@ tim.c:280:6:HAL_TIM_MspPostInit	40	static
 tim.c:308:6:HAL_TIM_Base_MspDeInit	16	static
 tim.c:338:6:HAL_TIM_Encoder_MspDeInit	16	static
 tim.c:364:6:SetPwmValue	16	static
-tim.c:368:6:HAL_TIM_PeriodElapsedCallback	24	static
-tim.c:409:6:GetEncoderValue	16	static
+tim.c:368:6:HAL_TIM_PeriodElapsedCallback	40	static
+tim.c:406:6:GetEncoderValue	16	static

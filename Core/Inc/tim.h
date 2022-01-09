@@ -42,6 +42,10 @@ extern int killme;
 
 char *msg;
 
+extern char uartMessages[1000][6];
+extern bool messagesReady;
+extern uint32_t k;
+
 /* USER CODE END Private defines */
 
 void MX_TIM1_Init(void);
@@ -51,7 +55,7 @@ void MX_TIM4_Init(void);
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
 /* USER CODE BEGIN Prototypes */
-void GetEncoderValue();
+void GetEncoderValue(double RPM);
 void SetPwmValue(uint32_t value);
 /* USER CODE END Prototypes */
 
