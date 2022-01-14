@@ -33,7 +33,7 @@ uint32_t pulseWidth = 0; // Current Pulse Width of PWM
 
 uint8_t messageLength = 5; // Size of message
 
-double RPM[10] = {0.0}; // Last 10 measurments
+double RPM[20] = {0.0}; // Last 10 measurments
 
 uint32_t encoderValue = 0; // Encoder reading
 
@@ -46,7 +46,9 @@ uint16_t difference = 0; // Storing difference of encoder readings
 uint8_t k = 0; // Variable used as a storage of index of filter input
 
 bool dataReady = false; // Flags that data is ready in vector;
-bool test = false;
+bool test = false; // Enables testing with custom PWM values in debug mode
+bool AdcEnabled;
+
 /* USER CODE END 0 */
 
 TIM_HandleTypeDef htim1;
@@ -259,7 +261,7 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* tim_baseHandle)
     __HAL_RCC_TIM1_CLK_ENABLE();
 
     /* TIM1 interrupt Init */
-    HAL_NVIC_SetPriority(TIM1_BRK_TIM9_IRQn, 2, 0);
+    HAL_NVIC_SetPriority(TIM1_BRK_TIM9_IRQn, 4, 0);
     HAL_NVIC_EnableIRQ(TIM1_BRK_TIM9_IRQn);
   /* USER CODE BEGIN TIM1_MspInit 1 */
 
@@ -289,7 +291,7 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* tim_baseHandle)
     __HAL_RCC_TIM9_CLK_ENABLE();
 
     /* TIM9 interrupt Init */
-    HAL_NVIC_SetPriority(TIM1_BRK_TIM9_IRQn, 2, 0);
+    HAL_NVIC_SetPriority(TIM1_BRK_TIM9_IRQn, 4, 0);
     HAL_NVIC_EnableIRQ(TIM1_BRK_TIM9_IRQn);
   /* USER CODE BEGIN TIM9_MspInit 1 */
 
@@ -477,7 +479,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 		SetPwmValue();
 
 		// End Cycle operations
-		lastEncoder = encoderValue;
+		lastEncoder = __HAL_TIM_GET_COUNTER(&htim3);
 		k = (k + 1) % FILTERN;
 		if(!dataReady) dataReady = !k;
 	}
@@ -534,7 +536,11 @@ void UpdatePid(double RPMAVG) {
 			+ (2 * pidController.N - pidController.sampleTime)
 					/ (2 * pidController.N + pidController.sampleTime)
 					* pidController.previousD;
-	pidController.sumOfIntegral = pidController.sumOfIntegral + uI;
+
+	if((pidController.sumOfIntegral + uI) < pidController.sumOfIntegral)
+		pidController.sumOfIntegral = 4294967295;
+	else
+		pidController.sumOfIntegral = pidController.sumOfIntegral + uI;
 	pidController.previousD = uD;
 	// Calculate control signal
 	pidController.controlSignal = uP + uI + uD;

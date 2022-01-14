@@ -37,12 +37,12 @@ extern TIM_HandleTypeDef htim4;
 extern TIM_HandleTypeDef htim9;
 
 /* USER CODE BEGIN Private defines */
-#define FILTERN 10 // Number of measurment points that goes to filter
+#define FILTERN 20 // Number of measurment points that goes to filter
 #define TIM4PERIOD 1 // Time period in ms of TIM4
 
 // Global
 extern uint32_t pulseWidth;
-extern double RPM[10];
+extern double RPM[20];
 extern bool dataReady;
 
 
