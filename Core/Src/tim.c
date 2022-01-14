@@ -46,6 +46,7 @@ uint16_t difference = 0; // Storing difference of encoder readings
 uint8_t k = 0; // Variable used as a storage of index of filter input
 
 bool dataReady = false; // Flags that data is ready in vector;
+bool test = false;
 /* USER CODE END 0 */
 
 TIM_HandleTypeDef htim1;
@@ -189,7 +190,7 @@ void MX_TIM4_Init(void)
   htim4.Instance = TIM4;
   htim4.Init.Prescaler = 7199;
   htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim4.Init.Period = 99;
+  htim4.Init.Period = 9;
   htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim4) != HAL_OK)
@@ -449,7 +450,9 @@ void HAL_TIM_Encoder_MspDeInit(TIM_HandleTypeDef* tim_encoderHandle)
 
 /* USER CODE BEGIN 1 */
 void SetPwmValue(){
-	pulseWidth = (uint32_t)(pidController.controlSignal);
+	if(!test){
+		pulseWidth = (uint32_t)(pidController.controlSignal*1000/12);
+	}
 
 	if(pulseWidth > 1000) pulseWidth = 1000;
 	if(pulseWidth < 0) pulseWidth = 0;
@@ -457,9 +460,7 @@ void SetPwmValue(){
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
-	if (htim->Instance == TIM4) { // 10ms timer
-
-
+	if (htim->Instance == TIM4) { // 1 ms timer
 		// Reading encoder value once per 10 ms to estimate RPM of motor
 		encoderValue = __HAL_TIM_GET_COUNTER(&htim3);
 		if (lastEncoder > encoderValue) {
@@ -471,15 +472,16 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 		RPM[k] = (difference) * scaler / 1928.0;
 		double avgRPM = GetEncoderValue();
 
-		// Updating PID measurments of RPM
+		// Updating PID measurments of RPM and setting output of voltage for regulation
 		UpdatePid(avgRPM);
+		SetPwmValue();
 
 		// End Cycle operations
 		lastEncoder = encoderValue;
 		k = (k + 1) % FILTERN;
 		if(!dataReady) dataReady = !k;
 	}
-	if (htim->Instance == TIM9) {
+	if (htim->Instance == TIM9) { // 100ms
 		// Updating reference value
 		ReadADC();
 		pidController.referenceSignal = (double)(ADC_Value/4095.0)*130;
@@ -520,15 +522,22 @@ void UpdatePid(double RPMAVG) {
 	pidController.controlError[1] = pidController.controlError[0];
 	pidController.controlError[0] = (pidController.referenceSignal
 			- pidController.measuredSpeed);
-	pidController.sumOfControlError += pidController.controlError[0];
+	//pidController.sumOfControlError += pidController.controlError[0];
 
+	double uP = pidController.Kp * pidController.controlError[1];
+	double uI = pidController.Kp * pidController.Ki * pidController.sampleTime
+			/ 2
+			* (pidController.controlError[1] + pidController.controlError[0]);
+	double uD = pidController.Kp * pidController.Kd * 2
+			/ (2 * pidController.N + pidController.sampleTime)
+			* (pidController.controlError[1] - pidController.controlError[0])
+			+ (2 * pidController.N - pidController.sampleTime)
+					/ (2 * pidController.N + pidController.sampleTime)
+					* pidController.previousD;
+	pidController.sumOfIntegral = pidController.sumOfIntegral + uI;
+	pidController.previousD = uD;
 	// Calculate control signal
-	pidController.controlSignal = pidController.Kp
-			* (1 * pidController.controlError[0]
-					+ pidController.sumOfControlError * 1 / pidController.Ti
-					+ pidController.Td
-							* (pidController.controlError[0]
-									- pidController.controlError[1]));
+	pidController.controlSignal = uP + uI + uD;
 }
 
 /* USER CODE END 1 */

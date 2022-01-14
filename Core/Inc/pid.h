@@ -19,15 +19,17 @@ typedef struct PID{
 	double referenceSignal;
 	double controlSignal;
 	double Kp;
-	double Ti;
-	double Td;
+	double Ki;
+	double Kd;
 	double measuredSpeed;
 	double controlError[2];
-	uint32_t sumOfControlError;
-
+	double sumOfIntegral;
+	double N;
+	double sampleTime;
+	double previousD;
 } PID;
 
 extern PID pidController;
 
-void InitPID(PID *pidC);
+void InitPID();
 #endif /* INC_PID_H_ */

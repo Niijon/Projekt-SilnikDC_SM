@@ -38,7 +38,7 @@ extern TIM_HandleTypeDef htim9;
 
 /* USER CODE BEGIN Private defines */
 #define FILTERN 10 // Number of measurment points that goes to filter
-#define TIM4PERIOD 10 // Time period in ms of TIM4
+#define TIM4PERIOD 1 // Time period in ms of TIM4
 
 // Global
 extern uint32_t pulseWidth;

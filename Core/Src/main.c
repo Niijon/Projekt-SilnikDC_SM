@@ -28,6 +28,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "lcd.h"
+#include "pid.h"
 #include <stdlib.h>
 /* USER CODE END Includes */
 
@@ -107,9 +108,14 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+  InitPID();
+
+
   HAL_TIM_Base_Start_IT(&htim4);
   HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_1);
   HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_2);
+
+
 
 //  lcd = Lcd_create(ports, pins, RS_GPIO_Port, RS_Pin, EN_GPIO_Port, EN_Pin, LCD_4_BIT_MODE);
 //
@@ -124,7 +130,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 
 	while (1) {
-		HAL_Delay(300);
+		//HAL_Delay(300);
 //	  HAL_UART_Transmit(&huart3, (uint8_t*)msg, strlen(msg), 1000);
     /* USER CODE END WHILE */
 
