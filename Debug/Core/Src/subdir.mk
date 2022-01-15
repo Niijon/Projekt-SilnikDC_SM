@@ -7,7 +7,6 @@
 C_SRCS += \
 ../Core/Src/adc.c \
 ../Core/Src/gpio.c \
-../Core/Src/lcd.c \
 ../Core/Src/main.c \
 ../Core/Src/pid.c \
 ../Core/Src/stm32f7xx_hal_msp.c \
@@ -22,7 +21,6 @@ C_SRCS += \
 OBJS += \
 ./Core/Src/adc.o \
 ./Core/Src/gpio.o \
-./Core/Src/lcd.o \
 ./Core/Src/main.o \
 ./Core/Src/pid.o \
 ./Core/Src/stm32f7xx_hal_msp.o \
@@ -37,7 +35,6 @@ OBJS += \
 C_DEPS += \
 ./Core/Src/adc.d \
 ./Core/Src/gpio.d \
-./Core/Src/lcd.d \
 ./Core/Src/main.d \
 ./Core/Src/pid.d \
 ./Core/Src/stm32f7xx_hal_msp.d \

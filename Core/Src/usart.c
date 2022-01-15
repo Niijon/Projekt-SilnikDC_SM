@@ -124,13 +124,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	if (huart->Instance == huart3.Instance) {
 		HAL_UART_Receive_IT(&huart3, usart_Message, 5);
 		if (!potentiometerEnabled) {
-			char *ptr;
 			long messageToSend = 0;
-			char usartCharBuffer[5] ={0};
 			messageToSend = 0;
-			for (int i = 0; i<5; i++){
-				usartCharBuffer[i] = usart_Message[i];
-			}
 			int sto = (usart_Message[0]-48)*100;
 			int dziesiec = (usart_Message[1]-48)*10;
 			int jednostki = (usart_Message[2]-48);

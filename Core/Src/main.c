@@ -27,7 +27,6 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "lcd.h"
 #include "pid.h"
 #include <stdlib.h>
 /* USER CODE END Includes */

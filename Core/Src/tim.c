@@ -462,7 +462,7 @@ void SetPwmValue(){
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
-	if (htim->Instance == TIM4) { // 1 ms timer
+	if (htim->Instance == TIM4) { // 5 ms timer
 		// Reading encoder value once per 10 ms to estimate RPM of motor
 		encoderValue = __HAL_TIM_GET_COUNTER(&htim3);
 		if (lastEncoder > encoderValue) {
@@ -471,7 +471,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 		}
 
 		difference = encoderValue - lastEncoder;
-		RPM[k] = (double)(difference) * scaler / 1928.0;//823.1; // 1928
+		RPM[k] = (double)(difference) * scaler / 1928.0;
 		double avgRPM = GetEncoderValue();
 
 		// Updating PID measurments of RPM and setting output of voltage for regulation
