@@ -24,6 +24,7 @@
 #include "adc.h"
 #include "pid.h"
 #include "usart.h"
+#include "gpio.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -33,7 +34,7 @@ uint32_t pulseWidth = 0; // Current Pulse Width of PWM
 
 uint8_t messageLength = 5; // Size of message
 
-double RPM[20] = {0.0}; // Last 10 measurments
+double RPM[6] = {0.0}; // Last 10 measurments
 
 uint32_t encoderValue = 0; // Encoder reading
 
@@ -48,7 +49,6 @@ uint8_t k = 0; // Variable used as a storage of index of filter input
 bool dataReady = false; // Flags that data is ready in vector;
 bool test = false; // Enables testing with custom PWM values in debug mode
 bool AdcEnabled;
-
 /* USER CODE END 0 */
 
 TIM_HandleTypeDef htim1;
@@ -192,7 +192,7 @@ void MX_TIM4_Init(void)
   htim4.Instance = TIM4;
   htim4.Init.Prescaler = 7199;
   htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim4.Init.Period = 9;
+  htim4.Init.Period = 49;
   htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim4) != HAL_OK)
@@ -231,7 +231,7 @@ void MX_TIM9_Init(void)
   htim9.Instance = TIM9;
   htim9.Init.Prescaler = 7199;
   htim9.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim9.Init.Period = 999;
+  htim9.Init.Period = 99;
   htim9.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim9.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim9) != HAL_OK)
@@ -276,7 +276,7 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* tim_baseHandle)
     __HAL_RCC_TIM4_CLK_ENABLE();
 
     /* TIM4 interrupt Init */
-    HAL_NVIC_SetPriority(TIM4_IRQn, 3, 0);
+    HAL_NVIC_SetPriority(TIM4_IRQn, 5, 0);
     HAL_NVIC_EnableIRQ(TIM4_IRQn);
   /* USER CODE BEGIN TIM4_MspInit 1 */
 
@@ -471,7 +471,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 		}
 
 		difference = encoderValue - lastEncoder;
-		RPM[k] = (difference) * scaler / 1928.0;
+		RPM[k] = (double)(difference) * scaler / 1928.0;//823.1; // 1928
 		double avgRPM = GetEncoderValue();
 
 		// Updating PID measurments of RPM and setting output of voltage for regulation
@@ -486,13 +486,19 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if (htim->Instance == TIM9) { // 100ms
 		// Updating reference value
 		ReadADC();
-		pidController.referenceSignal = (double)(ADC_Value/4095.0)*130;
+
+		if(pidController.referenceSignal < 10){
+			InitPID();
+		}
+		if (potentiometerEnabled) {
+			pidController.referenceSignal = (double) (ADC_Value / 4095.0)* 130;
+		}
 
 		// Sending data about current speed via USART
 		char *message = calloc(1, 6);
 		int RPMInt = (int)(pidController.measuredSpeed);
 		sprintf((char*) message, "%03i\n\r", RPMInt);
-		HAL_UART_Transmit(&huart3, (uint8_t *)message, strlen(message), 50);
+		HAL_UART_Transmit(&huart3, (uint8_t *)message, strlen(message), 1);
 		free(message);
 	}
 }
@@ -537,13 +543,13 @@ void UpdatePid(double RPMAVG) {
 					/ (2 * pidController.N + pidController.sampleTime)
 					* pidController.previousD;
 
-	if((pidController.sumOfIntegral + uI) < pidController.sumOfIntegral)
-		pidController.sumOfIntegral = 4294967295;
+	if((pidController.sumOfIntegral + uI) > 4000000000)
+		pidController.sumOfIntegral = 4000000000;
 	else
 		pidController.sumOfIntegral = pidController.sumOfIntegral + uI;
 	pidController.previousD = uD;
 	// Calculate control signal
-	pidController.controlSignal = uP + uI + uD;
+	pidController.controlSignal = uP + pidController.sumOfIntegral + uD;
 }
 
 /* USER CODE END 1 */

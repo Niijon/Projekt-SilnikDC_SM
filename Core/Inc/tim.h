@@ -28,7 +28,6 @@ extern "C" {
 #include "main.h"
 
 /* USER CODE BEGIN Includes */
-
 /* USER CODE END Includes */
 
 extern TIM_HandleTypeDef htim1;
@@ -37,15 +36,13 @@ extern TIM_HandleTypeDef htim4;
 extern TIM_HandleTypeDef htim9;
 
 /* USER CODE BEGIN Private defines */
-#define FILTERN 20 // Number of measurment points that goes to filter
-#define TIM4PERIOD 1 // Time period in ms of TIM4
+#define FILTERN 6 // Number of measurment points that goes to filter
+#define TIM4PERIOD 5 // Time period in ms of TIM4
 
 // Global
 extern uint32_t pulseWidth;
-extern double RPM[20];
+extern double RPM[6];
 extern bool dataReady;
-
-
 /* USER CODE END Private defines */
 
 void MX_TIM1_Init(void);
