@@ -485,12 +485,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	}
 	if (htim->Instance == TIM9) { // 100ms
 		// Updating reference value
-		ReadADC();
-
 		if(pidController.referenceSignal < 10){
 			InitPID();
 		}
 		if (potentiometerEnabled) {
+			ReadADC();
 			pidController.referenceSignal = (double) (ADC_Value / 4095.0)* 130;
 		}
 
@@ -530,7 +529,6 @@ void UpdatePid(double RPMAVG) {
 	pidController.controlError[1] = pidController.controlError[0];
 	pidController.controlError[0] = (pidController.referenceSignal
 			- pidController.measuredSpeed);
-	//pidController.sumOfControlError += pidController.controlError[0];
 
 	double uP = pidController.Kp * pidController.controlError[1];
 	double uI = pidController.Kp * pidController.Ki * pidController.sampleTime
@@ -548,6 +546,7 @@ void UpdatePid(double RPMAVG) {
 	else
 		pidController.sumOfIntegral = pidController.sumOfIntegral + uI;
 	pidController.previousD = uD;
+	
 	// Calculate control signal
 	pidController.controlSignal = uP + pidController.sumOfIntegral + uD;
 }

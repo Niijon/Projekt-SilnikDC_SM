@@ -14,7 +14,7 @@ void InitPID(){
 	pidController.Kd = 0.009549517991959;
 	pidController.Ki = 23.700532809609300;
 	pidController.N = 4371;
-	pidController.sampleTime = 0.001;
+	pidController.sampleTime = 0.005;
 	pidController.referenceSignal = 0;
 	pidController.controlError[0] = 0;
 	pidController.controlError[1] = 0;

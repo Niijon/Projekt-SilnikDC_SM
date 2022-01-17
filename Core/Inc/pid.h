@@ -11,22 +11,19 @@
 // Includes
 #include <stdint.h>
 
-// Defines
-#define SIZE 10
-
 /* PID controller with  */
 typedef struct PID{
-	double referenceSignal;
-	double controlSignal;
-	double Kp;
-	double Ki;
-	double Kd;
-	double measuredSpeed;
-	double controlError[2];
-	double sumOfIntegral;
-	double N;
-	double sampleTime;
-	double previousD;
+	double referenceSignal; // Current Reference signal
+	double controlSignal; // Current Control signal value
+	double Kp; // Proportional gain
+	double Ki; // Integral gain
+	double Kd; // Derivative gain
+	double measuredSpeed; // Current measured rotational speed[RPM]
+	double controlError[2]; // Current control error - [1], last control error - [0]
+	double sumOfIntegral; // Sum of integral 
+	double N; // Oreder of derivative filter
+	double sampleTime; // Sampling time 
+	double previousD; // Previous derivative control signal
 } PID;
 
 extern PID pidController;

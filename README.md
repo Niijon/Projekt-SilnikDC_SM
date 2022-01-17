@@ -19,12 +19,5 @@
  - ADC: IN3 -> PA3
  - PWM: OUT -> PE9
  - Encoder TI1 -> PA6, TI2 -> PC7
- - LCD:
-    - D4 -> PC0
-    - D5 -> PC3
-    - D6 -> PF3
-    - D7 -> PF7
-    - EN -> PD7
-    - RS -> PF10
 
 
