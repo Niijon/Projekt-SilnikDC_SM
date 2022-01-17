@@ -1,12 +1,11 @@
 # Projekt-SilnikDC_SM
 
 ## To-do list
- - [ ] USB serial communication
- - [ ] ADC with potentiometer and motor controll
- - [ ] PID Control
- - [ ] LCD 
- - [ ] Button for switching between reference signal features
- - [ ] Telemetry 
+ - [x] USB serial communication
+ - [x] ADC with potentiometer and motor controll
+ - [x] PID Control
+ - [x] Button for switching between reference signal features
+ - [x] Telemetry 
 
  ## About the project
  Controller can work in two different modes which are being swaped with button. First mode is USB mode in which we use UART serial communication to receive reference signal value and apply it in our programm. Controller is also sending data about measurments via UART to telemetry programm. 
